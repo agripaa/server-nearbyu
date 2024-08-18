@@ -318,19 +318,19 @@ class BookingController extends Controller
     public function verifyPayment($id)
     {
         $booking = Booking::with('orderDetail.proofOfPaymentImage', 'orderDetail.paymentMethod')->find($id);
-
+    
         if (!$booking) {
             return response()->json(['message' => 'Booking not found'], 404);
         }
-
+    
         if ($booking->orderDetail->status_id == 3) {
             return response()->json(['message' => 'Data was Activated'], 400);
         }
-
+    
         if (is_null($booking->orderDetail->proofOfPaymentImage->image_url)) {
             return response()->json(['message' => 'Payment proof not uploaded'], 400);
         }
-
+    
         $details = [
             'username' => $booking->user->username,
             'space_type' => $booking->product->space_type,
@@ -339,40 +339,44 @@ class BookingController extends Controller
             'check_out' => $booking->orderDetail->check_out,
             'payment_method' => $booking->orderDetail->paymentMethod->name,
         ];
-
+    
         $qrCodeDir = storage_path('app/public/qr_codes');
         if (!file_exists($qrCodeDir)) {
             mkdir($qrCodeDir, 0755, true);
         }
-
+    
         // Generate the QR code
         $qrCode = Builder::create()
             ->writer(new PngWriter())
             ->data(json_encode($details))
             ->build();
-
-        $qrCodePath = storage_path('app/public/qr_codes/' . $booking->orderDetail->unique_code . '.png');
-        Storage::put('public/qr_codes/' . $booking->orderDetail->unique_code . '.png', $qrCode->getString());
-
-        if (!file_exists($qrCodePath)) {
+    
+        $qrCodeFileName = $booking->orderDetail->unique_code . '.png';
+        $qrCodePath = 'public/qr_codes/' . $qrCodeFileName;
+        
+        // Save QR code using the Storage facade
+        Storage::put($qrCodePath, $qrCode->getString());
+    
+        // Check if file exists using Storage facade
+        if (!Storage::exists($qrCodePath)) {
             Log::error('QR Code file not found after saving: ' . $qrCodePath);
             return response()->json(['message' => 'QR Code file not found after saving'], 500);
         }
-
+    
         Log::info('QR Code saved at: ' . $qrCodePath);
-
-        $qrCodeUrl = '/storage/qr_codes/' . $booking->orderDetail->unique_code . '.png';
+    
+        $qrCodeUrl = Storage::url($qrCodePath);
         $booking->qr_code = $qrCodeUrl;
         $booking->orderDetail->status_id = 3;
         $booking->orderDetail->save();
         $booking->save();
-
+    
         $details['qr_code_path'] = $qrCodeUrl;
-
-        Mail::to($booking->user->email)->send(new BookingActivatedMail($details, $qrCodePath));
-
+    
+        Mail::to($booking->user->email)->send(new BookingActivatedMail($details, storage_path('app/public/qr_codes/' . $qrCodeFileName)));
+    
         Log::info('Booking after verification', ['booking' => $booking]);
-
+    
         return response()->json(['message' => 'Payment verified and booking activated', 'booking' => $booking], 200);
-    }
+    }    
 }

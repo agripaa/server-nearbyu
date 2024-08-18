@@ -38,38 +38,42 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'space_type' => 'required|string|max:255',
-            'price' => 'required|integer',
-            'kuota' => 'required|integer',
-            'desc' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'space_type' => 'required|string|max:255',
+                'price' => 'required|integer',
+                'kuota' => 'required|integer',
+                'desc' => 'required|string',
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 400);
+            }
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            $imagePath = $request->file('image')->store('images', 'public');
+            $imageProduct = ImageProduct::create([
+                'image_url' => Storage::url($imagePath),
+            ]);
+            $user = Auth::user();
+    
+            $product = Product::create([
+                'space_type' => $request->space_type,
+                'price' => $request->price,
+                'kuota' => $request->kuota,
+                'desc' => $request->desc,
+                'image_product_id' => $imageProduct->id,
+                'user_id' => $user->id,
+            ]);
+    
+            if (!$product) {
+                return response()->json(['message' => 'Product creation failed'], 500);
+            }
+            return response()->json($product, 201);
+        } catch (\Exception $e) {
+            Log::error('Error creating product: ' . $e->getMessage());
+            return response()->json(['message' => 'Product creation failed', 'error' => $e->getMessage()], 500);
         }
-
-        $imagePath = $request->file('image')->store('images', 'public');
-        $imageProduct = ImageProduct::create([
-            'image_url' => Storage::url($imagePath),
-        ]);
-        $user = Auth::user();
-
-        $product = Product::create([
-            'space_type' => $request->space_type,
-            'price' => $request->price,
-            'kuota' => $request->kuota,
-            'desc' => $request->desc,
-            'image_product_id' => $imageProduct->id,
-            'user_id' => $user->id,
-        ]);
-
-        if (!$product) {
-            return response()->json(['message' => 'Product creation failed'], 500);
-        }
-
-        return response()->json($product, 201);
     }
 
     public function show($id)
