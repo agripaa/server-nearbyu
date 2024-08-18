@@ -174,8 +174,6 @@ class AuthController extends Controller
     }
     
 
-      
-
     public function verifyOtp(Request $request)
     {
         $otpCode = OtpCode::where('otp', $request->otp)->first();
