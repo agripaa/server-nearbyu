@@ -28,7 +28,7 @@ class ForgotPasswordController extends Controller
         $user->reset_token = $token;
         $user->save();
 
-        $url = 'https://nearbyu.my.id/User/Resset password.php?id=' . $user->id . '&token=' . $request->reset_token;
+        $url = 'https://nearbyu.my.id/User/Resset password.php?id=' . $user->id . '&token=' . $user->reset_token;
 
         Mail::to($user->email)->send(new ResetPasswordMail($url));
 
