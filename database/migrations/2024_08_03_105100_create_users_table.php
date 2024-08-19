@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('email', 255);
             $table->string('password', 255);
             $table->string('phone_number', 30);
+            $table->string('reset_token', 255)->nullable();
             $table->unsignedBigInteger('image_profile_id')->nullable();
             $table->unsignedBigInteger('role_id');
             $table->timestamps();
