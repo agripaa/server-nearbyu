@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ResetPasswordMail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Routing\Controller;
-
 
 class ForgotPasswordController extends Controller
 {
@@ -44,6 +44,11 @@ class ForgotPasswordController extends Controller
         ]);
 
         $user = User::find($request->id);
+
+        // Log informasi untuk debugging
+        Log::info('User ID:', ['id' => $request->id]);
+        Log::info('Reset Token:', ['token' => $request->token]);
+        Log::info('Stored Token:', ['stored_token' => $user->reset_token]);
 
         if (!$user || $user->reset_token !== $request->token) {
             return response()->json(['message' => 'Invalid token or user'], 400);
