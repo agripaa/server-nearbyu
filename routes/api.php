@@ -13,9 +13,6 @@ use App\Http\Controllers\ReportController;
 Route::get('/download-sales-report', [ReportController::class, 'downloadSalesReport'])->name('download.sales.report');
 Route::get('/download-active-orders-report', [ReportController::class, 'downloadActiveOrdersReport'])->name('download.active.orders.report');
 
-Route::get('/reset-password', [AuthController::class, 'sendPasswordResetEmail']);
-Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-
 Route::post('payment-methods', [PaymentMethodController::class, 'create']);
 Route::get('payment-methods', [PaymentMethodController::class, 'getAll']);
 Route::get('payment-methods/{id}', [PaymentMethodController::class, 'getById']);
