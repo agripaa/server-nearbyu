@@ -26,7 +26,7 @@ Route::put('statuses/{id}', [StatusController::class, 'update']);
 Route::delete('statuses/{id}', [StatusController::class, 'delete']);
 
 Route::post('forgot-password', [ForgotPasswordController::class, 'sendPasswordResetEmail']);
-Route::post('reset-password', [ForgotPasswordController::class, 'resetPassword']);
+Route::post('reset-password/user', [ForgotPasswordController::class, 'resetPassword']);
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
