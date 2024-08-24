@@ -45,11 +45,6 @@ class ForgotPasswordController extends Controller
 
         $user = User::find($request->id);
 
-        // Log informasi untuk debugging
-        Log::info('User ID:', ['id' => $request->id]);
-        Log::info('Reset Token:', ['token' => $request->token]);
-        Log::info('Stored Token:', ['stored_token' => $user->reset_token]);
-
         if (!$user || $user->reset_token !== $request->token) {
             return response()->json(['message' => 'Invalid token or user'], 400);
         }

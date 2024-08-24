@@ -7,6 +7,7 @@ use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\ProofOfPaymentImage;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\BookingCancellationMail;
 use App\Mail\BookingActivatedMail;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -363,8 +364,6 @@ class BookingController extends Controller
             return response()->json(['message' => 'QR Code file not found after saving'], 500);
         }
     
-        Log::info('QR Code saved at: ' . $qrCodePath);
-    
         $qrCodeUrl = Storage::url($qrCodePath);
         $booking->qr_code = $qrCodeUrl;
         $booking->orderDetail->status_id = 3;
@@ -375,8 +374,22 @@ class BookingController extends Controller
     
         Mail::to($booking->user->email)->send(new BookingActivatedMail($details, storage_path('app/public/qr_codes/' . $qrCodeFileName)));
     
-        Log::info('Booking after verification', ['booking' => $booking]);
-    
         return response()->json(['message' => 'Payment verified and booking activated', 'booking' => $booking], 200);
     }    
+
+    public function cancelBooking(Request $request, $id)
+    {
+        $booking = Booking::find($id);
+
+        if (!$booking) {
+            return response()->json(['error' => 'Booking not found'], 404);
+        }
+
+        $reason = $request->input('reason');
+
+        // Send the cancellation email
+        Mail::to($booking->user->email)->send(new BookingCancellationMail($booking, $reason));
+
+        return response()->json(['success' => true, 'message' => 'Booking canceled and email sent to user.']);
+    }
 }

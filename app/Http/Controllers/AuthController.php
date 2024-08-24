@@ -108,11 +108,9 @@ class AuthController extends Controller
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
-    
         if (!$user) {
             return response()->json(['error' => 'Unauthenticated'], 401);
         }
-    
         $validator = Validator::make($request->all(), [
             'username' => 'required|string|max:25',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -129,15 +127,12 @@ class AuthController extends Controller
         if ($request->has('username')) {
             $user->username = $request->username;
         }
-    
         if ($request->has('email')) {
             $user->email = $request->email;
         }
-    
         if ($request->has('phone_number')) {
             $user->phone_number = $request->phone_number;
         }
-    
         if ($request->has('password')) {
             $user->password = Hash::make($request->password);
         }
@@ -146,11 +141,9 @@ class AuthController extends Controller
         if ($request->hasFile('image')) {
             $imageProfile = $user->imageProfile;
             $imageName = time() . '.' . $request->file('image')->getClientOriginalExtension();
-    
             // Debugging: Cek apakah file berhasil terupload
             if ($request->file('image')->isValid()) {
                 $request->file('image')->move(public_path('images/profile'), $imageName);
-    
                 if ($imageProfile) {
                     // Update existing image profile
                     $imageProfile->image_url = '/images/profile/' . $imageName;
@@ -164,7 +157,6 @@ class AuthController extends Controller
                 return response()->json(['error' => 'Uploaded file is not valid'], 400);
             }
         }
-    
         $user->update();
     
         return response()->json([
