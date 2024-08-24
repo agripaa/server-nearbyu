@@ -387,9 +387,15 @@ class BookingController extends Controller
 
         $reason = $request->input('reason');
 
-        // Send the cancellation email
-        Mail::to($booking->user->email)->send(new BookingCancellationMail($booking, $reason));
+        try {
+            Mail::to($booking->user->email)->send(new BookingCancellationMail($booking, $reason));
+            
+            $booking->delete();
 
-        return response()->json(['success' => true, 'message' => 'Booking canceled and email sent to user.']);
+            return response()->json(['success' => true, 'message' => 'Booking canceled, email sent to user, and booking deleted.']);
+        } catch (\Exception $e) {
+            Log::error('Error sending cancellation email: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to send email. Booking not deleted.'], 500);
+        }
     }
 }
