@@ -31,6 +31,7 @@ Route::post('reset-password/user', [ForgotPasswordController::class, 'resetPassw
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::post('login-admin', [AuthController::class, 'loginAdmin']);
+
 Route::post('send-otp', [AuthController::class, 'sendOtp']);
 Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('resend-otp', [AuthController::class, 'resendOtp']);
@@ -64,4 +65,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('bookings', [BookingController::class, 'createFromUser']);
     Route::post('bookings/{id}/upload-payment', [BookingController::class, 'uploadPaymentProof']);
     Route::post('bookings/{id}/verify-payment', [BookingController::class, 'verifyPayment']);
+    Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancelBooking']);
 });

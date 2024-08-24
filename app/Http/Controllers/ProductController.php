@@ -89,9 +89,6 @@ class ProductController extends Controller
 
     public function updateProduct(Request $request, $id)
     {
-        Log::info('Request all data:', $request->all());
-        Log::info('Request files data:', $request->file());
-
         $product = Product::find($id);
 
         if (!$product) {
