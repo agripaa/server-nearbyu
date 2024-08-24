@@ -43,6 +43,7 @@ Route::put('roles/{id}', [RoleController::class, 'update']);
 Route::delete('roles/{id}', [RoleController::class, 'delete']);
 
 Route::get('/products-noLog', [ProductController::class, 'getindexWithoutLogin']);
+Route::get('products-noLog/{id}', [ProductController::class, 'show']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/profile', [AuthController::class, 'getProfile']);
